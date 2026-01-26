@@ -22,11 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.alexrincon.aichat.data.model.ChatMessage
+import dev.alexrincon.aichat.data.model.MessageRole
 import dev.alexrincon.aichat.ui.theme.AiChatTheme
 
 @Composable
 fun ChatMessagesList(
-    messages: List<Message>,
+    messages: List<ChatMessage>,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
@@ -50,7 +52,7 @@ fun ChatMessagesList(
 
 @Composable
 fun MessageItem(
-    message: Message,
+    message: ChatMessage,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -116,17 +118,17 @@ fun MessagesListPreview() {
     AiChatTheme {
         ChatMessagesList(
             messages = listOf(
-                Message(
+                ChatMessage(
                     content = "Hola, ¿cómo estás?",
-                    isFromUser = true
+                    role = MessageRole.USER,
                 ),
-                Message(
+                ChatMessage(
                     content = "¡Hola! Estoy muy bien, gracias por preguntar. ¿En qué puedo ayudarte hoy?",
-                    isFromUser = false
+                    role = MessageRole.ASSISTANT,
                 ),
-                Message(
+                ChatMessage(
                     content = "Necesito ayuda con un proyecto",
-                    isFromUser = true
+                    role = MessageRole.USER,
                 )
             ),
             isLoading = false
@@ -139,9 +141,9 @@ fun MessagesListPreview() {
 fun MessageItemUserPreview() {
     AiChatTheme {
         MessageItem(
-            message = Message(
+            message = ChatMessage(
                 content = "Este es un mensaje del usuario",
-                isFromUser = true
+                role = MessageRole.USER,
             )
         )
     }
@@ -152,9 +154,9 @@ fun MessageItemUserPreview() {
 fun MessageItemBotPreview() {
     AiChatTheme {
         MessageItem(
-            message = Message(
+            message = ChatMessage(
                 content = "Esta es una respuesta del bot",
-                isFromUser = false
+                role = MessageRole.ASSISTANT,
             )
         )
     }
