@@ -20,7 +20,7 @@ class OpenAIDataSource @Inject constructor(
         val openAIMessages = messages.map { it.toOpenAIChatMessage() }
 
         val completionRequest = ChatCompletionRequest(
-            model = ModelId("gpt-3.5-turbo"),
+            model = ModelId("gpt-4o-mini"),
             messages = openAIMessages
         )
 

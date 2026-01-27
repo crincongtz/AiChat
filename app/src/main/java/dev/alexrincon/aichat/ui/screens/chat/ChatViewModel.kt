@@ -3,11 +3,14 @@ package dev.alexrincon.aichat.ui.screens.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.alexrincon.aichat.data.repository.ChatRepository
 import dev.alexrincon.aichat.data.model.ChatMessage
+import dev.alexrincon.aichat.data.model.MessageRole
+import dev.alexrincon.aichat.data.repository.ChatRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,69 +20,49 @@ class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ChatState())
-    val state: StateFlow<ChatState> = _state.asStateFlow()
+    private val _uiState = MutableStateFlow(UiState())
 
-    private val chatHistory = mutableListOf<ChatMessage>()
-
-    init {
-        val systemMessage = chatRepository.createSystemMessage(
-            "Eres un asistente muy útil y amigable."
+    val state: StateFlow<ChatState> = combine(
+        chatRepository.currentConversation,
+        _uiState
+    ) { messages, uiState ->
+        ChatState(
+            messages = messages.filter { it.role != MessageRole.SYSTEM },
+            isLoading = uiState.isLoading,
+            error = uiState.error,
         )
-        chatHistory.add(systemMessage)
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ChatState()
+    )
 
     fun sendMessage(message: String) {
         if (message.isBlank()) return
 
         viewModelScope.launch {
-            try {
-                // Añadir el mensaje del usuario
-                val  userMessage = chatRepository.createUserMessage(message)
-                chatHistory.add(userMessage)
 
-                _state.update { currentState ->
-                    currentState.copy(
-                        messages = currentState.messages + userMessage,
-                        isLoading = true,
-                        error = null
-                    )
-                }
+            _uiState.update { it.copy(isLoading = true, error = null) }
 
-                // Enviar a OpenAI y obtener respuesta
-                val aiResponse = chatRepository.getChatCompletion(chatHistory)
-
-                // Añadir la respuesta de la IA
-                val assistantMessage = chatRepository.createAssistantMessage(aiResponse)
-                chatHistory.add(assistantMessage)
-
-                _state.update { currentState ->
-                    currentState.copy(
-                        messages = currentState.messages + assistantMessage,
-                        isLoading = false
-                    )
+            chatRepository.sendMessage(message)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false) }
                 }
-            } catch (e: Exception) {
-                val errorMessage = when {
-                    e.message?.contains("429") == true -> 
-                        "Límite de solicitudes excedido. Por favor, verifica tu cuenta de OpenAI."
-                    e.message?.contains("401") == true -> 
-                        "API key inválida. Verifica tu configuración."
-                    e.message?.contains("quota") == true -> 
-                        "Cuota de API excedida. Verifica tu plan en OpenAI."
-                    else -> "Error: ${e.message}"
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Error: ${exception.localizedMessage}"
+                        )
+                    }
                 }
-                
-                _state.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        error = errorMessage
-                    )
-                }
-            }
         }
     }
 
+    private data class UiState(
+        val isLoading: Boolean = false,
+        val error: String? = null
+    )
 }
 
 data class ChatState(
