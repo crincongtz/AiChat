@@ -12,6 +12,7 @@ composeBom = "2025.12.01"
 hilt = "2.57"
 hiltNavigationCompose = "1.2.0"
 openai = "4.0.1"
+room = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +36,9 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 openai-client = { group = "com.aallam.openai", name = "openai-client", version.ref = "openai" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version = "3.0.3" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

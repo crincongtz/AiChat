@@ -22,6 +22,12 @@ class ChatViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(UiState())
 
+    init {
+        viewModelScope.launch {
+            chatRepository.initializeConversation()
+        }
+    }
+
     val state: StateFlow<ChatState> = combine(
         chatRepository.currentConversation,
         _uiState
