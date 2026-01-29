@@ -34,6 +34,8 @@ class ChatRepository @Inject constructor(
             }
         }
 
+    val allConversations: Flow<List<ConversationEntity>> = conversationDao.getAllConversations()
+
     suspend fun initializeConversation() {
         if (_currentConversationId.value == null) {
             val lastConversation = conversationDao.getLastConversation()
@@ -64,6 +66,8 @@ class ChatRepository @Inject constructor(
             saveMessage(userMessage)
 
             val conversationId = getCurrentConversationId()
+            updateConversationTitle(conversationId, content)
+
             val messageEntities = getMessagesSync(conversationId)
             val conversationHistory = messageEntities.toDomain()
 
@@ -108,6 +112,32 @@ class ChatRepository @Inject constructor(
                 it.copy(updatedAt = System.currentTimeMillis())
             )
         }
+    }
+
+    private suspend fun updateConversationTitle(conversationId: Long, firstMessage: String) {
+        val conversation = conversationDao.getConversationByIdSync(conversationId)
+        conversation?.let {
+            if (it.title == "Nueva conversación") {
+                val title = firstMessage.take(50)
+                conversationDao.updateConversation(
+                    it.copy(title = title)
+                )
+            }
+        }
+    }
+
+    suspend fun createNewConversationAndSwitch() {
+        val newId = createNewConversation()
+        _currentConversationId.value = newId
+        
+        val systemMessage = createSystemMessage(
+            "Eres un asistente muy útil y amigable. Responde de manera clara y concisa"
+        )
+        saveMessage(systemMessage)
+    }
+
+    fun switchToConversation(conversationId: Long) {
+        _currentConversationId.value = conversationId
     }
 
     private fun getCurrentConversationId(): Long {

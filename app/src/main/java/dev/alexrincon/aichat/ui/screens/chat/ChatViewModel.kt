@@ -3,6 +3,7 @@ package dev.alexrincon.aichat.ui.screens.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.alexrincon.aichat.data.local.entity.ConversationEntity
 import dev.alexrincon.aichat.data.model.ChatMessage
 import dev.alexrincon.aichat.data.model.MessageRole
 import dev.alexrincon.aichat.data.repository.ChatRepository
@@ -43,11 +44,17 @@ class ChatViewModel @Inject constructor(
         initialValue = ChatState()
     )
 
+    val conversations: StateFlow<List<ConversationEntity>> = chatRepository.allConversations
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun sendMessage(message: String) {
         if (message.isBlank()) return
 
         viewModelScope.launch {
-
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             chatRepository.sendMessage(message)
@@ -63,6 +70,16 @@ class ChatViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun createNewConversation() {
+        viewModelScope.launch {
+            chatRepository.createNewConversationAndSwitch()
+        }
+    }
+
+    fun switchToConversation(conversationId: Long) {
+        chatRepository.switchToConversation(conversationId)
     }
 
     private data class UiState(
