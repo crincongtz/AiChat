@@ -118,9 +118,13 @@ class ChatRepository @Inject constructor(
         val conversation = conversationDao.getConversationByIdSync(conversationId)
         conversation?.let {
             if (it.title == "Nueva conversación") {
-                val title = firstMessage.take(50)
+                val generatedTitle = try {
+                    openAIDataSource.generateConversationTitle(firstMessage)
+                } catch (e: Exception) {
+                    firstMessage.take(50)
+                }
                 conversationDao.updateConversation(
-                    it.copy(title = title)
+                    it.copy(title = generatedTitle)
                 )
             }
         }

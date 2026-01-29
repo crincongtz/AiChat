@@ -28,6 +28,26 @@ class OpenAIDataSource @Inject constructor(
         return completion.choices.first().message.content ?: "No se recibió respuesta de OpenAI"
     }
 
+    suspend fun generateConversationTitle(firstUserMessage: String): String {
+        val systemPrompt = OpenAIChatMessage(
+            role = ChatRole.System,
+            content = "Genera un título muy corto (máximo 6 palabras) que resuma el tema de la siguiente pregunta o mensaje. Responde SOLO con el título, sin comillas ni puntuación adicional."
+        )
+
+        val userPrompt = OpenAIChatMessage(
+            role = ChatRole.User,
+            content = firstUserMessage
+        )
+
+        val completionRequest = ChatCompletionRequest(
+            model = ModelId("gpt-4o-mini"),
+            messages = listOf(systemPrompt, userPrompt)
+        )
+
+        val completion: ChatCompletion = openAI.chatCompletion(completionRequest)
+        return completion.choices.first().message.content?.trim() ?: "Nueva conversación"
+    }
+
     private fun ChatMessage.toOpenAIChatMessage() : OpenAIChatMessage {
         val role = when (this.role) {
             MessageRole.USER -> ChatRole.User
