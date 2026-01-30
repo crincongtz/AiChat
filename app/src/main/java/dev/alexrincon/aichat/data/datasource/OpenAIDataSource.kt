@@ -6,14 +6,17 @@ import com.aallam.openai.api.chat.ChatMessage as OpenAIChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
+import dev.alexrincon.aichat.R
 import dev.alexrincon.aichat.data.model.ChatMessage
 import dev.alexrincon.aichat.data.model.MessageRole
+import dev.alexrincon.aichat.util.StringProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class OpenAIDataSource @Inject constructor(
-    private val openAI: OpenAI
+    private val openAI: OpenAI,
+    private val stringProvider: StringProvider
 ) {
 
     suspend fun getChatCompletion(messages: List<ChatMessage>): String {
@@ -25,13 +28,13 @@ class OpenAIDataSource @Inject constructor(
         )
 
         val completion: ChatCompletion = openAI.chatCompletion(completionRequest)
-        return completion.choices.first().message.content ?: "No se recibió respuesta de OpenAI"
+        return completion.choices.first().message.content ?: stringProvider.getString(R.string.error_no_response)
     }
 
     suspend fun generateConversationTitle(firstUserMessage: String): String {
         val systemPrompt = OpenAIChatMessage(
             role = ChatRole.System,
-            content = "Genera un título muy corto (máximo 6 palabras) que resuma el tema de la siguiente pregunta o mensaje. Responde SOLO con el título, sin comillas ni puntuación adicional."
+            content = stringProvider.getString(R.string.title_generation_prompt)
         )
 
         val userPrompt = OpenAIChatMessage(
@@ -45,7 +48,7 @@ class OpenAIDataSource @Inject constructor(
         )
 
         val completion: ChatCompletion = openAI.chatCompletion(completionRequest)
-        return completion.choices.first().message.content?.trim() ?: "Nueva conversación"
+        return completion.choices.first().message.content?.trim() ?: stringProvider.getString(R.string.default_conversation_title)
     }
 
     private fun ChatMessage.toOpenAIChatMessage() : OpenAIChatMessage {

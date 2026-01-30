@@ -1,5 +1,6 @@
 package dev.alexrincon.aichat.data.repository
 
+import dev.alexrincon.aichat.R
 import dev.alexrincon.aichat.data.datasource.OpenAIDataSource
 import dev.alexrincon.aichat.data.local.dao.ConversationDao
 import dev.alexrincon.aichat.data.local.dao.MessageDao
@@ -8,6 +9,7 @@ import dev.alexrincon.aichat.data.mapper.toDomain
 import dev.alexrincon.aichat.data.mapper.toEntity
 import dev.alexrincon.aichat.data.model.ChatMessage
 import dev.alexrincon.aichat.data.model.MessageRole
+import dev.alexrincon.aichat.util.StringProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +23,8 @@ import javax.inject.Singleton
 class ChatRepository @Inject constructor(
     private val openAIDataSource: OpenAIDataSource,
     private val conversationDao: ConversationDao,
-    private val messageDao: MessageDao
+    private val messageDao: MessageDao,
+    private val stringProvider: StringProvider
 ) {
     private val _currentConversationId = MutableStateFlow<Long?>(null)
     val currentConversationId: StateFlow<Long?> = _currentConversationId
@@ -47,7 +50,7 @@ class ChatRepository @Inject constructor(
                 _currentConversationId.value = newId
                 
                 val systemMessage = createSystemMessage(
-                    "Eres un asistente muy útil y amigable. Responde de manera clara y concisa"
+                    stringProvider.getString(R.string.system_prompt)
                 )
                 saveMessage(systemMessage)
             } else {
@@ -58,7 +61,7 @@ class ChatRepository @Inject constructor(
 
     suspend fun sendMessage(content: String): Result<Unit> {
         if (content.isBlank()) {
-            return Result.failure(IllegalArgumentException("El mensaje no puede estar vacío."))
+            return Result.failure(IllegalArgumentException(stringProvider.getString(R.string.error_empty_message)))
         }
 
         return try {
@@ -93,7 +96,7 @@ class ChatRepository @Inject constructor(
 
     private suspend fun createNewConversation(): Long {
         val conversation = ConversationEntity(
-            title = "Nueva conversación",
+            title = stringProvider.getString(R.string.default_conversation_title),
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis()
         )
@@ -119,7 +122,7 @@ class ChatRepository @Inject constructor(
     private suspend fun updateConversationTitle(conversationId: Long, firstMessage: String) {
         val conversation = conversationDao.getConversationByIdSync(conversationId)
         conversation?.let {
-            if (it.title == "Nueva conversación") {
+            if (it.title == stringProvider.getString(R.string.default_conversation_title)) {
                 val generatedTitle = try {
                     openAIDataSource.generateConversationTitle(firstMessage)
                 } catch (e: Exception) {
@@ -137,7 +140,7 @@ class ChatRepository @Inject constructor(
         _currentConversationId.value = newId
         
         val systemMessage = createSystemMessage(
-            "Eres un asistente muy útil y amigable. Responde de manera clara y concisa"
+            stringProvider.getString(R.string.system_prompt)
         )
         saveMessage(systemMessage)
     }
@@ -161,7 +164,7 @@ class ChatRepository @Inject constructor(
                 val newId = createNewConversation()
                 _currentConversationId.value = newId
                 val systemMessage = createSystemMessage(
-                    "Eres un asistente muy útil y amigable. Responde de manera clara y concisa"
+                    stringProvider.getString(R.string.system_prompt)
                 )
                 saveMessage(systemMessage)
             }
@@ -170,7 +173,7 @@ class ChatRepository @Inject constructor(
 
     private fun getCurrentConversationId(): Long {
         return _currentConversationId.value ?: throw IllegalStateException(
-            "No hay conversación activa. Llama a initializeConversation() primero."
+            stringProvider.getString(R.string.error_no_active_conversation)
         )
     }
 

@@ -15,7 +15,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.alexrincon.aichat.R
 
 @Composable
 fun ChatInputField(
@@ -38,7 +40,7 @@ fun ChatInputField(
             OutlinedTextField(
                 value = message,
                 onValueChange = onMessageChange,
-                placeholder = { Text("Escribe un mensaje...") },
+                placeholder = { Text(stringResource(R.string.hint_message_input)) },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     IconButton(
@@ -47,7 +49,7 @@ fun ChatInputField(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Enviar mensaje",
+                            contentDescription = stringResource(R.string.content_description_send_message),
                             tint = if (message.isNotBlank()) {
                                 MaterialTheme.colorScheme.primary
                             } else {

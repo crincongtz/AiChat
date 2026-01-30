@@ -24,8 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.alexrincon.aichat.R
 import dev.alexrincon.aichat.data.local.entity.ConversationEntity
 
 @Composable
@@ -55,7 +57,7 @@ fun ConversationsDrawer(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 8.dp)
                     )
-                    Text("Nueva conversación")
+                    Text(stringResource(R.string.button_new_conversation))
                 }
             }
 
@@ -69,7 +71,7 @@ fun ConversationsDrawer(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No hay conversaciones",
+                        text = stringResource(R.string.text_no_conversations),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -120,7 +122,7 @@ private fun ConversationItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Borrar conversación",
+                    contentDescription = stringResource(R.string.content_description_delete_conversation),
                     tint = MaterialTheme.colorScheme.error
                 )
             }

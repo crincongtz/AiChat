@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">AiChat</string>
+    
+    <!-- Chat Screen -->
+    <string name="title_ai_chat">AI Chat</string>
+    <string name="content_description_menu">Open menu</string>
+    
+    <!-- Conversations Drawer -->
+    <string name="button_new_conversation">New conversation</string>
+    <string name="text_no_conversations">No conversations</string>
+    <string name="content_description_delete_conversation">Delete conversation</string>
+    
+    <!-- Chat Input -->
+    <string name="hint_message_input">Write a message…</string>
+    <string name="content_description_send_message">Send message</string>
+    
+    <!-- Empty State -->
+    <string name="text_empty_chat">Send a message to start chatting</string>
+    
+    <!-- Repository Messages -->
+    <string name="system_prompt">You are a very helpful and friendly assistant. Answer clearly and concisely</string>
+    <string name="error_empty_message">The message cannot be empty.</string>
+    <string name="default_conversation_title">New conversation</string>
+    <string name="error_no_active_conversation">No active conversation. Call initializeConversation() first.</string>
+    
+    <!-- OpenAI DataSource -->
+    <string name="error_no_response">No response received from OpenAI</string>
+    <string name="title_generation_prompt">Generate a very short title (maximum 6 words) that summarizes the topic of the following question or message. Reply ONLY with the title, without quotes or additional punctuation.</string>
 </resources>

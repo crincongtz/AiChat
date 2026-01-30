@@ -27,8 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.alexrincon.aichat.R
 import dev.alexrincon.aichat.ui.theme.AiChatTheme
 import kotlinx.coroutines.launch
 
@@ -83,7 +85,7 @@ fun ChatScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("AI Chat") },
+                    title = { Text(stringResource(R.string.title_ai_chat)) },
                     navigationIcon = {
                         IconButton(
                             onClick = {
@@ -92,7 +94,7 @@ fun ChatScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = "Abrir menú"
+                                contentDescription = stringResource(R.string.content_description_menu)
                             )
                         }
                     }
