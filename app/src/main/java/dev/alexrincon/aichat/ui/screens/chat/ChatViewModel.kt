@@ -31,10 +31,12 @@ class ChatViewModel @Inject constructor(
 
     val state: StateFlow<ChatState> = combine(
         chatRepository.currentConversation,
+        chatRepository.currentConversationId,
         _uiState
-    ) { messages, uiState ->
+    ) { messages, currentConversationId, uiState ->
         ChatState(
             messages = messages.filter { it.role != MessageRole.SYSTEM },
+            currentConversationId = currentConversationId,
             isLoading = uiState.isLoading,
             error = uiState.error,
         )
@@ -82,6 +84,12 @@ class ChatViewModel @Inject constructor(
         chatRepository.switchToConversation(conversationId)
     }
 
+    fun deleteConversation(conversationId: Long) {
+        viewModelScope.launch {
+            chatRepository.deleteConversation(conversationId)
+        }
+    }
+
     private data class UiState(
         val isLoading: Boolean = false,
         val error: String? = null
@@ -90,6 +98,7 @@ class ChatViewModel @Inject constructor(
 
 data class ChatState(
     val messages: List<ChatMessage> = emptyList(),
+    val currentConversationId: Long? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

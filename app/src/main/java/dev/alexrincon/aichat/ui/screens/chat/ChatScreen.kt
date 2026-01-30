@@ -65,6 +65,7 @@ fun ChatScreen(
         drawerContent = {
             ConversationsDrawer(
                 conversations = conversations,
+                currentConversationId = state.currentConversationId,
                 onConversationClick = { conversationId ->
                     viewModel.switchToConversation(conversationId)
                     scope.launch { drawerState.close() }
@@ -72,6 +73,9 @@ fun ChatScreen(
                 onNewConversationClick = {
                     viewModel.createNewConversation()
                     scope.launch { drawerState.close() }
+                },
+                onDeleteConversation = { conversationId ->
+                    viewModel.deleteConversation(conversationId)
                 }
             )
         }

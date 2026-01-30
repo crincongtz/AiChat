@@ -10,6 +10,7 @@ import dev.alexrincon.aichat.data.model.ChatMessage
 import dev.alexrincon.aichat.data.model.MessageRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -23,6 +24,7 @@ class ChatRepository @Inject constructor(
     private val messageDao: MessageDao
 ) {
     private val _currentConversationId = MutableStateFlow<Long?>(null)
+    val currentConversationId: StateFlow<Long?> = _currentConversationId
 
     val currentConversation: Flow<List<ChatMessage>> = _currentConversationId
         .flatMapLatest { conversationId ->
@@ -142,6 +144,28 @@ class ChatRepository @Inject constructor(
 
     fun switchToConversation(conversationId: Long) {
         _currentConversationId.value = conversationId
+    }
+
+    suspend fun deleteConversation(conversationId: Long) {
+        val isCurrentConversation = _currentConversationId.value == conversationId
+
+        messageDao.deleteMessagesByConversationId(conversationId)
+        conversationDao.deleteConversation(conversationId)
+
+        if (isCurrentConversation) {
+            val remainingConversations = conversationDao.getLastConversation()
+            
+            if (remainingConversations != null) {
+                _currentConversationId.value = remainingConversations.id
+            } else {
+                val newId = createNewConversation()
+                _currentConversationId.value = newId
+                val systemMessage = createSystemMessage(
+                    "Eres un asistente muy útil y amigable. Responde de manera clara y concisa"
+                )
+                saveMessage(systemMessage)
+            }
+        }
     }
 
     private fun getCurrentConversationId(): Long {
